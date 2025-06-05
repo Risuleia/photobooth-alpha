@@ -1,11 +1,11 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
-  "productName": "Photobooth",
-  "version": "1.0.6",
-  "identifier": "com.tauri.photobooth",
+  "productName": "Photobooth Alpha",
+  "version": "1.0.0",
+  "identifier": "com.tauri.photobooth-alpha",
   "build": {
     "frontendDist": "../dist",
-    "devUrl": "http://localhost:5174",
+    "devUrl": "http://localhost:5173",
     "beforeDevCommand": "npm run dev",
     "beforeBuildCommand": "tsc -b && vite build"
   },
@@ -14,7 +14,7 @@
     "windows": [
       {
         "label": "main",
-        "title": "Photobooth",
+        "title": "Photobooth Alpha",
         "focus": true,
         "width": 1000,
         "height": 600,

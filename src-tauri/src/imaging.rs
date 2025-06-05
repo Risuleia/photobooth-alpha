@@ -1,6 +1,10 @@
-use std::{fs, process::Command};
+use std::{fs, path::PathBuf, process::Command};
 
-use image::{imageops::FilterType::Lanczos3, GenericImage, GenericImageView, Rgba, RgbaImage};
+use ab_glyph::{FontArc, PxScale};
+use chrono::Local;
+use image::{GenericImage, GenericImageView, Rgba, RgbaImage};
+use imageproc::drawing::draw_text_mut;
+use tauri::{AppHandle, Manager};
 
 #[tauri::command(async)]
 pub async fn capture(output_path: &str) -> Result<String, String> {
@@ -54,17 +58,27 @@ pub async fn capture(output_path: &str) -> Result<String, String> {
 // }
 
 #[tauri::command(async)]
-pub async fn print(images: Vec<String>, output_path: &str, color_mode: &str, copies: usize) -> Result<(), String> {
-    let dpi = 300;
-    let border_cm = 0.15;
-    let border_px = ((border_cm / 2.54) * dpi as f32).round() as u32;
+pub async fn print(
+    _app: AppHandle,
+    images: Vec<String>,
+    output_path: &str,
+    color_mode: &str,
+    copies: usize
+) -> Result<(), String> {
+    let dpi = 300.0f32;
 
-    let strip_width = 1200;
-    let strip_height = 1800;
+    let strip_width = (4f32 * dpi).round() as u32;
+    let strip_height = (6f32 * dpi).round() as u32;
 
-    let center_gap = 2 * border_px;
+    let border_cm = 0.15f32;
+    let border_px = ((border_cm / 2.54) * dpi).round() as u32;
+
+    let center_gap = border_px * 2;
+    let branding_height = ((1.0f32 / 2.54) * dpi).round() as u32;
+
+    let available_height = strip_height - branding_height - (4 * border_px);
     let cell_width = (strip_width - (2 * border_px) - center_gap) / 2;
-    let cell_height = (strip_height - (3 * border_px)) / 4;
+    let cell_height = available_height / 4;
 
     let bg_color = if color_mode == "B&W" {
         Rgba([0, 0, 0, 255])
@@ -75,48 +89,52 @@ pub async fn print(images: Vec<String>, output_path: &str, color_mode: &str, cop
     let mut canvas = RgbaImage::from_pixel(strip_width, strip_height, bg_color);
 
     for (i, img_path) in images.iter().enumerate().take(4) {
-        let y_offset = i as u32 * (cell_height + border_px);
+        let y_offset = border_px + i as u32 * (cell_height + border_px);
 
         let photo = match image::open(img_path) {
             Ok(img) => {
-                let (width, height) = img.dimensions();
-                let aspect_ratio = width as f32 / height as f32;
+                let (orig_w, orig_h) = img.dimensions();
+                let cell_aspect = cell_width as f32 / cell_height as f32;
+                let img_aspect = orig_w as f32 / orig_h as f32;
 
-                let mut resized_width = cell_width;
-                let mut resized_height = (resized_width as f32 / aspect_ratio).round() as u32;
+                let (crop_x, crop_y, crop_w, crop_h) = if img_aspect > cell_aspect {
+                    let new_w = (orig_h as f32 * cell_aspect).round() as u32;
+                    let x = (orig_w - new_w) / 2;
+                    (x, 0, new_w, orig_h)
+                } else {
+                    let new_h = (orig_w as f32 / cell_aspect).round() as u32;
+                    let y = (orig_h - new_h) / 2;
+                    (0, y, orig_w, new_h)
+                };
 
-                if resized_height > cell_height {
-                    resized_height = cell_height;
-                    resized_width = (resized_height as f32 * aspect_ratio).round() as u32;
-                }
-
-                let resized = img.resize(resized_width, resized_height, Lanczos3);
-                let mut bordered = RgbaImage::from_pixel(cell_width, cell_height, bg_color);
-
-                let x_offset_center = (cell_width - resized_width) / 2;
-                let y_offset_center = (cell_height - resized_height) / 2;
-
-                bordered
-                    .copy_from(&resized, x_offset_center, y_offset_center)
-                    .map_err(|e| format!("Failed to place resized photo: {}", e))?;
-
-                bordered
+                let cropped = image::imageops::crop_imm(&img, crop_x, crop_y, crop_w, crop_h).to_image();
+                image::imageops::resize(
+                    &cropped,
+                    cell_width,
+                    cell_height,
+                    image::imageops::FilterType::Lanczos3,
+                )
             }
-            Err(e) => return Err(format!("Failed to open image {}: {}", img_path, e)),
+            Err(e) => {
+                eprintln!("Failed to open image {}: {}", img_path, e);
+                return Err(format!("Failed to open image {}: {}", img_path, e));
+            }
         };
 
-        let left_x_offset = border_px;
-        let right_x_offset = border_px + cell_width + center_gap;
+        let left_x = border_px;
+        let right_x = border_px + cell_width + center_gap;
 
-        canvas
-            .copy_from(&photo, left_x_offset, y_offset)
-            .map_err(|e| format!("Failed to place photo in left column: {}", e))?;
-        canvas
-            .copy_from(&photo, right_x_offset, y_offset)
-            .map_err(|e| format!("Failed to place photo in right column: {}", e))?;
+        if let Err(e) = canvas.copy_from(&photo, left_x, y_offset) {
+            eprintln!("Left photo error: {}", e);
+            return Err(format!("Left photo error: {}", e));
+        }
+
+        if let Err(e) = canvas.copy_from(&photo, right_x, y_offset) {
+            eprintln!("Right photo error: {}", e);
+            return Err(format!("Right photo error: {}", e));
+        }
     }
 
-    // Convert to grayscale if needed
     if color_mode == "B&W" {
         for pixel in canvas.pixels_mut() {
             let [r, g, b, a] = pixel.0;
@@ -125,28 +143,101 @@ pub async fn print(images: Vec<String>, output_path: &str, color_mode: &str, cop
         }
     }
 
-    // Save the final image
+    let date_text = Local::now().format("%d.%m.%Y").to_string();
+    let font_data = include_bytes!("../fonts/JMH Typewriter.ttf");
+    let font = FontArc::try_from_slice(font_data as &[u8])
+        .expect("Failed to load font");
+
+    let scale = PxScale {
+        x: 70.0,
+        y: 70.0
+    };
+
+    let text_color = if color_mode == "B&W" {
+        Rgba([255, 255, 255, 255])
+    } else {
+        Rgba([0, 0, 0, 255])
+    };
+
+    let padding_x = border_px + 155;
+    let padding_y = border_px + 80;
+
+    draw_text_mut(
+        &mut canvas,
+        text_color,
+        padding_x.try_into().unwrap(),
+        ((strip_height - padding_y)).try_into().unwrap(),
+        scale,
+        &font,
+        &date_text
+    );
+    draw_text_mut(
+        &mut canvas,
+        text_color,
+        padding_x.try_into().unwrap(),
+        ((strip_height - padding_y)).try_into().unwrap(),
+        scale,
+        &font,
+        &date_text
+    );
+
+    draw_text_mut(
+        &mut canvas,
+        text_color,
+        (padding_x + cell_width + center_gap).try_into().unwrap(),
+        ((strip_height - padding_y)).try_into().unwrap(),
+        scale,
+        &font,
+        &date_text
+    );
+
     if let Err(e) = canvas.save(output_path) {
-        return Err(format!("Failed to save print copy: {}", e));
+        eprintln!("Failed to save image: {}", e);
+        return Err(format!("Failed to save image: {}", e));
     }
 
-    // Print the image
+    let mut canvas2 = RgbaImage::from_pixel(strip_width, strip_height, bg_color);
+
+    let strip = match image::open(output_path) {
+        Ok(img) => image::imageops::resize(
+            &img,
+            strip_width - (2 * border_px),
+            strip_height - (2 * border_px),
+            image::imageops::FilterType::Lanczos3,
+        ),
+        Err(e) => {
+            eprintln!("Failed to open image {}: {}", output_path, e);
+            return Err(format!("Failed to open image {}: {}", output_path, e));
+        }
+    };
+
+    if let Err(e) = canvas2.copy_from(&strip, border_px, border_px) {
+        eprintln!("Failed to copy final strip to canvas2: {}", e);
+        return Err(e.to_string());
+    }
+
+    if let Err(e) = canvas2.save(output_path) {
+        eprintln!("Failed to save final image: {}", e);
+        return Err(format!("Failed to save image: {}", e));
+    }
+
     let print_res = Command::new("lp")
         .arg("-n")
-        .arg((copies / 2).to_string()) // Print full copies
+        .arg((copies / 2).to_string())
         .arg(output_path)
         .output();
 
     match print_res {
         Ok(output) => {
             if !output.status.success() {
-                return Err(format!(
-                    "Failed to print: {}",
-                    String::from_utf8_lossy(&output.stderr)
-                ));
+                eprintln!("Failed to print: {}", String::from_utf8_lossy(&output.stderr));
+                return Err(format!("Failed to print: {}", String::from_utf8_lossy(&output.stderr)));
             }
         }
-        Err(e) => return Err(format!("Failed to execute print command: {}", e)),
+        Err(e) => {
+            eprintln!("Failed to execute print command: {}", e);
+            return Err(format!("Failed to execute print command: {}", e));
+        }
     }
 
     Ok(())

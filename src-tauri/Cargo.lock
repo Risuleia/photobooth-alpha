@@ -3,8 +3,8 @@
 version = 3
 
 [[package]]
-name = "Photobooth"
-version = "1.0.6"
+name = "Photobooth-"
+version = "1.0.0"
 dependencies = [
  "ab_glyph",
  "base64 0.22.1",
