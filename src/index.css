@@ -1,0 +1,56 @@
+@font-face {
+  font-family: IntegralCF;
+  src: url('./assets/Fonts/IntegralCF-Regular.otf');
+}
+@font-face {
+  font-family: Satoshi;
+  src: url('./assets/Fonts/Satoshi-Variable.ttf');
+}
+@font-face {
+  font-family: Seriguela;
+  src: url('./assets/Fonts/Seriguela-Bold.otf');
+}
+
+:root {
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  --txt-clr: #FFFFFF;
+  --bg-clr-1: #131313;
+  --bg-clr-2: #222222;
+  --border-clr: #5B5B5B;
+  --accent-1: #FFD585;
+  --accent-2: #9BA1A6;
+}
+
+html, body {
+  touch-action: manipulation;
+  -ms-touch-action: manipulation;
+  overscroll-behavior: none;
+}
+
+body {
+  margin: 0;
+  display: flex;
+  place-items: center;
+  width: 100%;
+  min-height: 100vh;
+  background-color: var(--bg-clr-1);
+  /* cursor: none !important; */
+}
+
+*, *::before, *::after {
+  color: var(--txt-clr);
+  font-family: Satoshi;
+  cursor: inherit !important;
+  user-select: none;
+  -moz-user-select: none;
+  -moz-user-select: none;
+}
+
+h1, h2 {
+  font-family: Seriguela;
+  margin: 0;
+}

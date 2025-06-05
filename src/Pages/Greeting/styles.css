@@ -1,0 +1,58 @@
+#greeting {
+    display: flex;
+    width: 100%;
+    height: 100vh;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+.greeting-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+    width: 50%;
+}
+
+.greeting-title {
+    font-size: 5vmin;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    text-align: center;
+    font-weight: 700;
+    color: var(--accent-1);
+}
+.greeting-subtitle {
+    font-size: 3vmin;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    text-align: center;
+}
+.greeting-arrow {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 40%;
+    aspect-ratio: 1;
+    filter: invert(.2) brightness(1.8) hue-rotate(167deg) sepia(.6);
+}
+
+.greeting-progress {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: var(--accent-2);
+    gap: 1rem;
+    line-height: 1;
+}
+.greeting-progress .greeting-progress-loader {
+    margin: -30%;
+    filter: brightness(2);
+    height: 4rem;
+}

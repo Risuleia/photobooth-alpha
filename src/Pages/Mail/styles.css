@@ -1,0 +1,158 @@
+#mail {
+    display: flex;
+    width: 100%;
+    height: 100vh;
+    justify-content: flex-start;
+    align-items: center;
+    flex-direction: column;
+}
+
+.mail-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    width: 100%;
+    height: 100vh;
+    gap: 3rem;
+    padding: 4rem;
+}
+
+.mail-container .heading {
+    color: var(--txt-clr);
+    font-size: 10vmin;
+}
+.mail-container .heading div {
+    display: inline;
+    font-family: Seriguela;
+    color: var(--accent-1);
+}
+
+.mail-container .input-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+    width: 40%;
+}
+
+.mail-container .input-container .input-box {
+    display: flex;
+    gap: 1rem;
+    width: 100%;
+    justify-content: center;
+    align-items: center;
+}
+.mail-container .input-container .input-box .input {
+    border: none;
+    font-size: 2.5vmin;
+    padding: .8rem 2rem;
+    border-radius: 50px;
+    font-weight: 500;
+    font-family: Satoshi;
+    background: var(--txt-clr);
+    color: #000;
+    width: 100%;
+}
+.mail-container .input-container .input-box .send-btn {
+    border: none;
+    font-size: 2.5vmin;
+    padding: .8rem 2rem;
+    border-radius: 50px;
+    font-family: Satoshi;
+    background: var(--accent-1);
+    color: #000;
+    font-weight: 500;
+}
+.mail-container .err-text {
+    width: 100%;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    font-size: 2.4vmin;
+    margin-left: 2.5rem;
+    color: #d9798c;
+}
+
+.disclaimer {
+    bottom: 0;
+    padding-block: 4vmin;
+    font-size: 2.5vmin;
+    color: var(--accent-2);
+}
+
+#keyboard {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+#keyboard .react-simple-keyboard * {
+    font-weight: 600;
+    font-size: 1.5rem;
+}
+
+#keyboard .hg-theme-default {
+    background-color: #1e1e1e;
+    border-radius: 10px;
+    padding: 10px;
+}
+#keyboard .hg-rows {
+    flex-direction: column;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: .6rem;
+}
+#keyboard .hg-row {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: .6rem;
+    margin: 0;
+}
+
+#keyboard .hg-button {
+    background: #343333;
+    color: #fff;
+    border: 1px solid #444;
+    padding: 2rem !important;
+    transition: all 250ms ease-out;
+    margin: 0;
+}
+#keyboard .hg-button:hover,
+#keyboard .hg-button:active,
+#keyboard .hg-button:focus,
+#keyboard .hg-button:focus-visible,
+#keyboard .hg-button:focus-within {
+    filter: brightness(1.2);
+    transition: all 250ms ease-out;
+}
+
+
+#keyboard .hg-button.hg-functionBtn:not(.hg-button-space) {
+    background: #5a5b75;
+}
+#keyboard .hg-theme-default .hg-button.hg-standardBtn[data-skbtn=","],
+#keyboard .hg-theme-default .hg-button.hg-standardBtn[data-skbtn="."],
+#keyboard .hg-theme-default .hg-button.hg-standardBtn[data-skbtn=".com"],
+#keyboard .hg-theme-default .hg-button.hg-standardBtn[data-skbtn=".in"],
+#keyboard .hg-theme-default .hg-button.hg-standardBtn[data-skbtn=".net"] {
+    background: #4e4f5c;
+}
+
+#keyboard .hg-theme-default .hg-button.hg-standardBtn[data-skbtn="@"],
+#keyboard .hg-theme-default .hg-button.hg-standardBtn[data-skbtn=","],
+#keyboard .hg-theme-default .hg-button.hg-standardBtn[data-skbtn="."],
+#keyboard .hg-theme-default .hg-button.hg-standardBtn[data-skbtn=".com"],
+#keyboard .hg-theme-default .hg-button.hg-standardBtn[data-skbtn=".in"],
+#keyboard .hg-theme-default .hg-button.hg-standardBtn[data-skbtn=".net"],
+#keyboard .hg-theme-default .hg-button[data-skbtn="{lock}"],
+#keyboard .hg-theme-default .hg-button[data-skbtn="{shift}"] {
+    max-width: fit-content;
+}
