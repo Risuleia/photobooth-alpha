@@ -13,8 +13,12 @@ static IS_SENDING: Lazy<AtomicBool> = Lazy::new(|| AtomicBool::new(false));
 #[tauri::command]
 pub fn store_email(document_path: String, user_email: String, photo_paths: Vec<String>) -> Result<String, String> {
     tauri::async_runtime::spawn(async move {
-        if let Err(e) = store_email_req(document_path, user_email, photo_paths) {
-            eprintln!("Failed to store emails: {}", e);
+        if let Err(e) = store_email_req(document_path.clone(), user_email, photo_paths) {
+            eprintln!("Failed to store emails: {e}");
+        }
+
+        if let Err(e) = send_email_req(document_path).await {
+            eprintln!("Failed to send emails: {e}")
         }
     });
 

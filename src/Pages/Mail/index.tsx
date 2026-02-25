@@ -33,8 +33,6 @@ export default function Mail() {
   }, [])
 
   async function handleEmail() {
-    navigate("/greeting")
-    
     try {
       await invoke<string>("store_email", {
         documentPath: documentPath,
@@ -43,6 +41,8 @@ export default function Mail() {
       })
     } catch (err) {
       console.error("Error storing email:", err)
+    } finally {
+      navigate("/greeting")
     }
   }
 

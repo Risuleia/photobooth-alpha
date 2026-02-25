@@ -23,7 +23,8 @@ export default function Home() {
             hasRun = true
 
             const path = await documentDir()
-            await invoke("send_email", { documentPath: path })
+            const response = await invoke<string>("send_email", { documentPath: path })
+            console.log(response)
         }
     
         sendEmails()
