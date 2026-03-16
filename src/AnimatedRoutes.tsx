@@ -8,7 +8,10 @@ import reset from './Utils/reset'
 const Home = React.lazy(() => import('./Pages/Home'))
 const Mail = React.lazy(() => import('./Pages/Mail'))
 const Greeting = React.lazy(() => import('./Pages/Greeting'))
-const Mode = React.lazy(() => import('./Pages/Mode'))
+const Admin = React.lazy(() => import('./Pages/Admin'))
+const AdminMode = React.lazy(() => import('./Pages/Admin/Mode'))
+const AdminPricing = React.lazy(() => import('./Pages/Admin/Pricing'))
+const AdminPages = React.lazy(() => import('./Pages/Admin/Pages'))
 const Countdown = React.lazy(() => import('./Pages/Countdown'))
 const Passcode = React.lazy(() => import('./Pages/Passcode'))
 const Copies = React.lazy(() => import('./Pages/Form/Copies'))
@@ -23,13 +26,17 @@ export default function AnimatedRoutes() {
             <AnimatePresence>
                 <DataProvider>
                     <RedirectAfterTimeout />
-
+                    
                     <Routes location={location} key={location.pathname}>
                         <Route path='/' element={<Home />} />
                         <Route path='/mail' element={<Mail />} />
                         <Route path='/greeting' element={<Greeting />} />
                         <Route path='/passcode' element={<Passcode />} />
-                        <Route path='/mode' element={<Mode />} />
+                        <Route path='/admin' element={<Admin />}>
+                            <Route path='mode' element={<AdminMode />} />
+                            <Route path='pricing' element={<AdminPricing />} />
+                            <Route path='pages' element={<AdminPages />} />
+                        </Route>
                         <Route path='/countdown' element={<Countdown />} />
                         <Route path='/copies' element={<Copies />} />
                         <Route path='/print' element={<Print />} />
@@ -48,7 +55,7 @@ function RedirectAfterTimeout() {
     const { setOptions, setImages } = useData()
 
     useEffect(() => {
-        if (location.pathname == "/") return
+        if (location.pathname == "/") return;
 
         const timeout = setTimeout(() => {
             reset(setOptions, setImages, navigate)
@@ -56,6 +63,6 @@ function RedirectAfterTimeout() {
 
         return () => clearTimeout(timeout)
     }, [navigate])
-
-    return null
+    
+    return null;
 }

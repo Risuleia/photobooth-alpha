@@ -186,7 +186,7 @@ async fn send_email_req(document_path: String) -> Result<String, String> {
 
 fn format_files(document_path: String, user_email: String, photo_paths: Vec<String>) -> Result<Vec<String>, Box<dyn Error>> {
     let email_prefix = user_email.split('@').next().unwrap_or("unknown");
-    let storage_dir = PathBuf::from(&document_path).join("Memorabooth");
+    let storage_dir = PathBuf::from(&document_path).join("Memorabooth=Alpha");
 
     fs::create_dir_all(&storage_dir).map_err(|e| format!("Failed to create directory: {}", e))?;
 

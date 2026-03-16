@@ -4,6 +4,7 @@ use tauri::Manager;
 mod razorpay;
 mod mail;
 mod imaging;
+mod config;
  
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -14,7 +15,11 @@ pub fn run() {
       imaging::capture,
       imaging::print,
       mail::store_email,
-      mail::send_email
+      mail::send_email,
+      config::save_pricing,
+      config::get_or_init_pricing,
+      config::save_pages,
+      config::get_or_init_pages,
     ])
     .setup(|app| {
       let window = app.get_webview_window("main").unwrap();

@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { invoke } from '@tauri-apps/api/core'
 import { pictureDir } from '@tauri-apps/api/path'
@@ -10,19 +10,20 @@ import reset from '../../Utils/reset'
 import './styles.css'
 import { path } from '@tauri-apps/api'
 import { DotLottieReact } from '@lottiefiles/dotlottie-react'
+import { savePages } from '../../Services/commands'
 
 export default function Greeting() {
-  const { setOptions, options, images, setImages } = useData()
+  const { setOptions, options, images, setImages, pages, setPages } = useData()
   const navigate = useNavigate()
 
-  const greetings = [
+  const greetings = useMemo(() => [
     "Photos so good, they might break the internet!",
     "Your photos are hotter than the flash we just used!",
     "Warning: These pictures may cause excessive smiling!",
     "We hope you love these pics as much as the camera loved you!",
     "Caution: These photos may cause extreme nostalgia in the future.",
     "Looking this good should be illegal!"
-  ]
+  ], [])
 
   const [progressText, setProgressText] = useState("0 of 0")
   const [showLoader, setShowLoader] = useState(true)
@@ -40,6 +41,9 @@ export default function Greeting() {
           colorMode: options.print == Print.COLOR ? "COLOR" : "B&W",
           copies: options.copies
         })
+        
+        await savePages(pages + options.copies!)
+        setPages(pages + options.copies!)
 
         console.log("Print successful")
       } catch (err) {
