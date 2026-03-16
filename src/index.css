@@ -47,7 +47,8 @@ body {
   cursor: inherit !important;
   user-select: none;
   -moz-user-select: none;
-  -moz-user-select: none;
+  -ms-user-select: none;
+  -webkit-user-select: none;
 }
 
 h1, h2 {

@@ -42,8 +42,8 @@ export default function Greeting() {
           copies: options.copies
         })
         
-        await savePages(pages + options.copies!)
-        setPages(pages + options.copies!)
+        await savePages(pages + (options.copies! / 2))
+        setPages(pages + (options.copies! / 2))
 
         console.log("Print successful")
       } catch (err) {

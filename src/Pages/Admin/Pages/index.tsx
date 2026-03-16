@@ -41,6 +41,7 @@ export default function Pages() {
             value={localPages}
             onChange={(e) => setLocalPages(Number(e.target.value))}
             className="page-number-input"
+            min={0}
           />
         </div>
       </motion.div>
