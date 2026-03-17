@@ -15,9 +15,17 @@ pub fn store_email(document_path: String, user_email: String, photo_paths: Vec<S
     tauri::async_runtime::spawn(async move {
         if let Err(e) = store_email_req(document_path.clone(), user_email, photo_paths) {
             eprintln!("Failed to store emails: {e}");
+            return;
         }
 
-        if let Err(e) = send_email_req(document_path).await {
+        if IS_SENDING.compare_exchange(false, true, Ordering::SeqCst, Ordering::SeqCst).is_err() {
+            return;
+        }
+
+        let res = send_email_req(document_path).await;
+        IS_SENDING.store(false, Ordering::SeqCst);
+
+        if let Err(e) = res {
             eprintln!("Failed to send emails: {e}")
         }
     });
@@ -26,7 +34,11 @@ pub fn store_email(document_path: String, user_email: String, photo_paths: Vec<S
 }
 
 fn store_email_req(document_path: String, user_email: String, photo_paths: Vec<String>) -> Result<(), String> {
-    let json_path: PathBuf = PathBuf::from(document_path.clone()).join("emails.json");
+    let mut json_path = PathBuf::from(document_path.clone());
+    json_path.push("Memorabooth");
+    fs::create_dir_all(&json_path).map_err(|e| e.to_string())?;
+
+    json_path.push("emails.json");
 
     let new_photo_paths = format_files((document_path).to_string(), user_email.clone(), photo_paths);
     if let Err(e) = new_photo_paths {
@@ -87,7 +99,12 @@ pub fn send_email(document_path: String) ->  Result<String, String> {
 async fn send_email_req(document_path: String) -> Result<String, String> {
     let api_key = dotenv_codegen::dotenv!("ZEPTOMAIL_API_KEY");
 
-    let json_path: PathBuf = PathBuf::from(&document_path).join("emails.json");
+    let mut json_path = PathBuf::from(document_path.clone());
+    json_path.push("Memorabooth");
+    fs::create_dir_all(&json_path).map_err(|e| e.to_string())?;
+
+    json_path.push("emails.json");
+
     let zepto_url = "https://api.zeptomail.in/v1.1/email";
 
     let client = Client::new();
@@ -186,7 +203,7 @@ async fn send_email_req(document_path: String) -> Result<String, String> {
 
 fn format_files(document_path: String, user_email: String, photo_paths: Vec<String>) -> Result<Vec<String>, Box<dyn Error>> {
     let email_prefix = user_email.split('@').next().unwrap_or("unknown");
-    let storage_dir = PathBuf::from(&document_path).join("Memorabooth=Alpha");
+    let storage_dir = PathBuf::from(&document_path).join("Memorabooth");
 
     fs::create_dir_all(&storage_dir).map_err(|e| format!("Failed to create directory: {}", e))?;
 
